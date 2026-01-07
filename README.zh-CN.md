@@ -17,13 +17,13 @@ description: 从 DeepWiki 获取 GitHub 仓库的文档和知识。支持查看�
 ## 安装
 
 ```bash
-npm install @skills/deepwiki
+npm install -g deepwiki-cli
 ```
 
 或使用 pnpm:
 
 ```bash
-pnpm add @skills/deepwiki
+pnpm add -g deepwiki-cli
 ```
 
 ## 工具用法

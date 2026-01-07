@@ -11,13 +11,13 @@ A powerful CLI tool for retrieving GitHub repository documentation and knowledge
 ## Installation
 
 ```bash
-npm install @skills/deepwiki
+npm install -g deepwiki-cli
 ```
 
 Or using pnpm:
 
 ```bash
-pnpm add @skills/deepwiki
+pnpm add -g deepwiki-cli
 ```
 
 ## Usage
