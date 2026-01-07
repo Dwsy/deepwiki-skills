@@ -1,69 +1,127 @@
 ---
 name: deepwiki
-description: 从 DeepWiki 获取 GitHub 仓库的文档和知识。支持查看文档结构、内容以及针对仓库提问。
+description: Retrieve GitHub repository documentation and knowledge from DeepWiki. Supports viewing document structure, content, and asking questions about repositories.
 ---
 
-# DeepWiki 技能
+# DeepWiki Skill
 
-此技能通过 MCP SSE 协议连接到 DeepWiki。
+This skill connects to DeepWiki via MCP SSE protocol.
 
-## 执行环境
+## Execution Environment
 
-| 路径类型 | 路径 | 基准目录 |
-|---------|------|---------|
-| **技能目录** | `~/.pi/agent/skills/deepwiki/` | 固定位置 |
-| **主脚本** | `~/.pi/agent/skills/deepwiki/dw.js` | 技能目录 |
+| Path Type | Path | Base Directory |
+|-----------|------|----------------|
+| **Skill Directory** | `~/.pi/agent/skills/deepwiki/` | Fixed location |
+| **Main Script** | `~/.pi/agent/skills/deepwiki/dw.js` | Skill directory |
 
-## 安装
+## Installation
 
-### 本地使用（技能目录）
+### Local Usage (Skill Directory)
 ```bash
 cd ~/.pi/agent/skills/deepwiki
 npm install eventsource axios
 ```
 
-### 全局安装（推荐）
+### Global Installation (Recommended)
 ```bash
 npm install -g deepwiki-cli
 ```
 
-或使用 pnpm:
+Or using pnpm:
 ```bash
 pnpm add -g deepwiki-cli
 ```
 
-## 工具用法
+## Usage
 
-### 1. 获取仓库文档主题列表
+### 1. Get Repository Documentation Structure
 ```bash
 cd ~/.pi/agent/skills/deepwiki
 node dw.js read_wiki_structure --repoName "owner/repo"
 ```
 
-### 2. 查看具体文档内容
+### 2. View Specific Documentation Content
 ```bash
 cd ~/.pi/agent/skills/deepwiki
 node dw.js read_wiki_contents --repoName "owner/repo" --topic "topic_name"
 ```
 
-### 3. 针对仓库提问
+### 3. Ask Questions About Repository
 ```bash
 cd ~/.pi/agent/skills/deepwiki
-node dw.js ask_question --repoName "owner/repo" --question "你的问题"
+node dw.js ask_question --repoName "owner/repo" --question "your question"
 ```
 
-## 路径说明
+## Global CLI Usage
 
-- **所有脚本必须从 `~/.pi/agent/skills/deepwiki/` 目录执行**
-- `dw.js` 文件位于技能安装目录中，不随工作目录变化
-- 如果从其他目录执行，必须先 `cd ~/.pi/agent/skills/deepwiki/`
+After global installation, you can use the `deepwiki` or `dw` command from anywhere:
 
-## 仓库
+```bash
+# Using full command name
+deepwiki read_wiki_structure --repoName "owner/repo"
+deepwiki read_wiki_contents --repoName "owner/repo" --topic "topic_name"
+deepwiki ask_question --repoName "owner/repo" --question "your question"
+
+# Using short alias
+dw rws -r "owner/repo"
+dw rwc -r "owner/repo" -t "topic_name"
+dw aq -r "owner/repo" -q "your question"
+```
+
+## Command Aliases
+
+The CLI provides convenient aliases for all commands:
+
+| Full Command | Short Aliases | Description |
+|--------------|---------------|-------------|
+| `read_wiki_structure` | `rws`, `str` | Get repository documentation structure |
+| `read_wiki_contents` | `rwc`, `cont` | Read specific documentation content |
+| `ask_question` | `aq`, `ask` | Ask questions about the repository |
+
+## Parameter Aliases
+
+Parameters also support shorthand forms:
+
+| Full Parameter | Short Form | Description |
+|----------------|------------|-------------|
+| `--repoName` | `-r`, `--repo` | Repository name (e.g., "owner/repo") |
+| `--topic` | `-t` | Documentation topic name |
+| `--question` | `-q` | Your question about the repository |
+| `--lang` | `-l` | Language (en|zh, default: auto) |
+| `--help` | `-h` | Show help |
+
+## Shell Completions
+
+The package includes shell completion scripts for bash, zsh, and fish.
+
+### Bash
+```bash
+source ~/.pi/agent/skills/deepwiki/completions/bash
+```
+
+### Zsh
+```bash
+source ~/.pi/agent/skills/deepwiki/completions/zsh
+```
+
+### Fish
+```bash
+source ~/.pi/agent/skills/deepwiki/completions/deepwiki.fish
+source ~/.pi/agent/skills/deepwiki/completions/dw.fish
+```
+
+## Path Notes
+
+- **All scripts must be executed from the `~/.pi/agent/skills/deepwiki/` directory**
+- The `dw.js` file is located in the skill installation directory and does not change with the working directory
+- If executing from another directory, you must first `cd ~/.pi/agent/skills/deepwiki/`
+
+## Repository
 
 - **GitHub**: https://github.com/Dwsy/deepwiki-skills
 - **npm**: https://www.npmjs.com/package/deepwiki-cli
 
-## 文档
+## Documentation
 
 - [English Documentation](./README.md)
 - [中文文档](./README.zh-CN.md)
