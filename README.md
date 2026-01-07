@@ -72,6 +72,10 @@ ISC
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## Repository
+
+https://github.com/Dwsy/deepwiki-skills
+
 ---
 
 [中文文档](./README.zh-CN.md)

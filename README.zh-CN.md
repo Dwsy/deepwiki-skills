@@ -52,6 +52,10 @@ node dw.js ask_question --repoName "owner/repo" --question "你的问题"
 - `dw.js` 文件位于技能安装目录中，不随工作目录变化
 - 如果从其他目录执行，必须先 `cd ~/.pi/agent/skills/deepwiki/`
 
+## 仓库地址
+
+https://github.com/Dwsy/deepwiki-skills
+
 ---
 
 [English Documentation](./README.md)
