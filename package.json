@@ -4,7 +4,7 @@
   "description": "A CLI tool for retrieving GitHub repository documentation and knowledge via DeepWiki MCP SSE protocol",
   "main": "dw.js",
   "bin": {
-    "deepwiki": "./dw.js"
+    "deepwiki": "dw.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
