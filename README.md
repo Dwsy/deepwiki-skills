@@ -11,7 +11,13 @@ A powerful CLI tool for retrieving GitHub repository documentation and knowledge
 ## Installation
 
 ```bash
-npm install eventsource axios
+npm install @skills/deepwiki
+```
+
+Or using pnpm:
+
+```bash
+pnpm add @skills/deepwiki
 ```
 
 ## Usage

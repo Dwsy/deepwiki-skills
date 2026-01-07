@@ -1,5 +1,5 @@
 {
-  "name": "deepwiki-cli",
+  "name": "@skills/deepwiki",
   "version": "1.0.0",
   "description": "A CLI tool for retrieving GitHub repository documentation and knowledge via DeepWiki MCP SSE protocol",
   "main": "dw.js",

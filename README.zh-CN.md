@@ -17,15 +17,13 @@ description: 从 DeepWiki 获取 GitHub 仓库的文档和知识。支持查看�
 ## 安装
 
 ```bash
-# 方式 1：从技能目录执行
-cd ~/.pi/agent/skills/deepwiki
-npm init -y
-npm install eventsource axios
+npm install @skills/deepwiki
+```
 
-# 方式 2：使用完整路径（推荐）
-cd ~/.pi/agent/skills/deepwiki
-npm init -y
-npm install eventsource axios
+或使用 pnpm:
+
+```bash
+pnpm add @skills/deepwiki
 ```
 
 ## 工具用法
@@ -53,3 +51,7 @@ node dw.js ask_question --repoName "owner/repo" --question "你的问题"
 - **所有脚本必须从 `~/.pi/agent/skills/deepwiki/` 目录执行**
 - `dw.js` 文件位于技能安装目录中，不随工作目录变化
 - 如果从其他目录执行，必须先 `cd ~/.pi/agent/skills/deepwiki/`
+
+---
+
+[English Documentation](./README.md)
