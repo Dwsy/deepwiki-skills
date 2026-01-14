@@ -52,6 +52,12 @@ cd ~/.pi/agent/skills/deepwiki
 node dw.js ask_question --repoName "owner/repo" --question "your question"
 ```
 
+### 4. View Shared Query Result (Direct API Access)
+```bash
+cd ~/.pi/agent/skills/deepwiki
+node dw.js view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"
+```
+
 ## Global CLI Usage
 
 After global installation, you can use the `deepwiki` or `dw` command from anywhere:
@@ -61,11 +67,13 @@ After global installation, you can use the `deepwiki` or `dw` command from anywh
 deepwiki read_wiki_structure --repoName "owner/repo"
 deepwiki read_wiki_contents --repoName "owner/repo" --topic "topic_name"
 deepwiki ask_question --repoName "owner/repo" --question "your question"
+deepwiki view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"
 
 # Using short alias
 dw rws -r "owner/repo"
 dw rwc -r "owner/repo" -t "topic_name"
 dw aq -r "owner/repo" -q "your question"
+dw vs -u "_5495e609-f29e-44a7-a7bf-91c3f8f76303"
 ```
 
 ## Command Aliases
@@ -77,6 +85,7 @@ The CLI provides convenient aliases for all commands:
 | `read_wiki_structure` | `rws`, `str` | Get repository documentation structure |
 | `read_wiki_contents` | `rwc`, `cont` | Read specific documentation content |
 | `ask_question` | `aq`, `ask` | Ask questions about the repository |
+| `view_share` | `vs` | View shared query result by UUID |
 
 ## Parameter Aliases
 
@@ -87,6 +96,7 @@ Parameters also support shorthand forms:
 | `--repoName` | `-r`, `--repo` | Repository name (e.g., "owner/repo") |
 | `--topic` | `-t` | Documentation topic name |
 | `--question` | `-q` | Your question about the repository |
+| `--uuid` | `-u` | Share query UUID (e.g., "_5495e609-f29e-44a7-a7bf-91c3f8f76303") |
 | `--lang` | `-l` | Language (en|zh, default: auto) |
 | `--help` | `-h` | Show help |
 

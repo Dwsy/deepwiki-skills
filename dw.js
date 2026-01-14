@@ -17,17 +17,21 @@ const MESSAGES = {
       'read_wiki_contents': 'Read specific documentation content',
       'rwc': '[alias] Read specific documentation content',
       'ask_question': 'Ask questions about the repository',
-      'aq': '[alias] Ask questions about the repository'
+      'aq': '[alias] Ask questions about the repository',
+      'view_share': 'View shared query result by UUID',
+      'vs': '[alias] View shared query result by UUID'
     },
     options: {
       repoName: 'Repository name (e.g., "owner/repo")',
       topic: 'Documentation topic name',
-      question: 'Your question about the repository'
+      question: 'Your question about the repository',
+      uuid: 'Share query UUID (e.g., "_5495e609-f29e-44a7-a7bf-91c3f8f76303")'
     },
     examples: {
       structure: '  deepwiki read_wiki_structure --repoName "openai/openai-node"',
       contents: '  deepwiki read_wiki_contents --repoName "openai/openai-node" --topic "Installation"',
-      question: '  deepwiki ask_question --repoName "openai/openai-node" --question "How to authenticate?"'
+      question: '  deepwiki ask_question --repoName "openai/openai-node" --question "How to authenticate?"',
+      share: '  deepwiki view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"'
     },
     errors: {
       noCommand: 'Error: No command provided',
@@ -35,6 +39,7 @@ const MESSAGES = {
       missingRepo: 'Error: --repoName is required',
       missingTopic: 'Error: --topic is required',
       missingQuestion: 'Error: --question is required',
+      missingUuid: 'Error: --uuid is required',
       connectionFailed: 'Error: SSE connection failed',
       requestFailed: 'Error: Request failed',
       timeout: 'Error: Timeout - no response from server'
@@ -56,17 +61,21 @@ const MESSAGES = {
       'read_wiki_contents': '查看具体文档内容',
       'rwc': '[别名] 查看具体文档内容',
       'ask_question': '针对仓库提问',
-      'aq': '[别名] 针对仓库提问'
+      'aq': '[别名] 针对仓库提问',
+      'view_share': '查看分享的查询结果',
+      'vs': '[别名] 查看分享的查询结果'
     },
     options: {
       repoName: '仓库名称 (例如: "owner/repo")',
       topic: '文档主题名称',
-      question: '关于仓库的问题'
+      question: '关于仓库的问题',
+      uuid: '分享查询的 UUID (例如: "_5495e609-f29e-44a7-a7bf-91c3f8f76303")'
     },
     examples: {
       structure: '  deepwiki read_wiki_structure --repoName "openai/openai-node"',
       contents: '  deepwiki read_wiki_contents --repoName "openai/openai-node" --topic "Installation"',
-      question: '  deepwiki ask_question --repoName "openai/openai-node" --question "如何认证?"'
+      question: '  deepwiki ask_question --repoName "openai/openai-node" --question "如何认证?"',
+      share: '  deepwiki view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"'
     },
     errors: {
       noCommand: '错误: 未提供命令',
@@ -74,6 +83,7 @@ const MESSAGES = {
       missingRepo: '错误: 需要 --repoName 参数',
       missingTopic: '错误: 需要 --topic 参数',
       missingQuestion: '错误: 需要 --question 参数',
+      missingUuid: '错误: 需要 --uuid 参数',
       connectionFailed: '错误: SSE 连接失败',
       requestFailed: '错误: 请求失败',
       timeout: '错误: 超时 - 未收到服务器响应'
@@ -114,6 +124,7 @@ function printHelp() {
   console.log(`  --repoName, -r, --repo  ${t.options.repoName}`);
   console.log(`  --topic, -t            ${t.options.topic}`);
   console.log(`  --question, -q         ${t.options.question}`);
+  console.log(`  --uuid, -u             ${t.options.uuid}`);
   console.log(`  --lang, -l             Language (en|zh, default: auto)`);
   console.log(`  --help, -h             ${t.help.title}`);
   console.log();
@@ -122,11 +133,13 @@ function printHelp() {
   console.log('  rws, str               read_wiki_structure');
   console.log('  rwc, cont              read_wiki_contents');
   console.log('  aq, ask                ask_question');
+  console.log('  vs                     view_share');
   console.log();
   console.log(t.help.examplesSection);
   console.log(t.examples.structure);
   console.log(t.examples.contents);
   console.log(t.examples.question);
+  console.log(t.examples.share);
   console.log();
   console.log(t.help.seeAlso);
   console.log();
@@ -139,7 +152,8 @@ const COMMAND_ALIASES = {
   'aq': 'ask_question',
   'str': 'read_wiki_structure',
   'cont': 'read_wiki_contents',
-  'ask': 'ask_question'
+  'ask': 'ask_question',
+  'vs': 'view_share'
 };
 
 // Parameter aliases
@@ -148,6 +162,7 @@ const PARAM_ALIASES = {
   'repo': 'repoName',
   't': 'topic',
   'q': 'question',
+  'u': 'uuid',
   'l': 'lang'
 };
 
@@ -220,7 +235,7 @@ function validateCommand(parsed) {
   }
 
   // Validate required parameters
-  if (!parsed.params.repoName) {
+  if (parsed.command !== 'view_share' && !parsed.params.repoName) {
     console.error(t.errors.missingRepo);
     process.exit(1);
   }
@@ -232,6 +247,11 @@ function validateCommand(parsed) {
 
   if (parsed.command === 'ask_question' && !parsed.params.question) {
     console.error(t.errors.missingQuestion);
+    process.exit(1);
+  }
+
+  if (parsed.command === 'view_share' && !parsed.params.uuid) {
+    console.error(t.errors.missingUuid);
     process.exit(1);
   }
 
@@ -252,6 +272,42 @@ async function run() {
   if (!validated) return;
 
   const { command, params } = validated;
+
+  // Handle view_share command directly via API
+  if (command === 'view_share') {
+    try {
+      const url = `https://api.devin.ai/ada/query/${params.uuid}`;
+      const response = await axios.get(url, {
+        headers: {
+          'Accept': 'application/json'
+        },
+        timeout: 30000
+      });
+
+      if (response.data.queries && response.data.queries.length > 0) {
+        const query = response.data.queries[0];
+        if (query.response) {
+          query.response.forEach(item => {
+            if (item.type === 'file_contents') {
+              console.log(`\n=== File: ${item.data[1]} ===\n`);
+              console.log(item.data[2]);
+            } else if (item.type === 'text') {
+              console.log(item.data);
+            }
+          });
+        } else {
+          console.log(JSON.stringify(response.data, null, 2));
+        }
+      } else {
+        console.log(JSON.stringify(response.data, null, 2));
+      }
+
+      process.exit(0);
+    } catch (err) {
+      console.error(t.errors.requestFailed, err.response?.data || err.message);
+      process.exit(1);
+    }
+  }
 
   const es = new EventSource(MCP_ENDPOINT);
   let postUrl = '';
