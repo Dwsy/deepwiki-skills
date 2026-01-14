@@ -6,6 +6,156 @@ const path = require('path');
 
 const MCP_ENDPOINT = 'https://mcp.deepwiki.com/sse';
 
+// Type definitions for view_share response
+
+// Response type handlers
+const RESPONSE_HANDLERS = {
+  'module_call_id': (item) => {
+    return `[Module Call ID: ${item.data?.module_call_id}]`;
+  },
+  'loading_indexes': (item) => {
+    const data = item.data;
+    const progress = data.type === 'all_indexes' ? 'Complete' : 'Loading';
+    return `[${progress}: ${data.type}${data.durationSeconds ? ` (${data.durationSeconds.toFixed(2)}s)` : ''}]`;
+  },
+  'file_contents': (item) => {
+    const [repo, filePath, content] = item.data || [];
+    return {
+      type: 'file',
+      repo,
+      filePath,
+      content
+    };
+  },
+  'file_path_range': (item) => {
+    const { file_path, range_start, range_end } = item.data || {};
+    return `[File Range: ${file_path} (${range_start}-${range_end})]`;
+  },
+  'stats': (item) => {
+    const { key, value } = item.data || {};
+    const duration = value ? ` ${value.toFixed(2)}ms` : '';
+    return `[Stats: ${key}${duration}]`;
+  },
+  'text': (item) => {
+    return {
+      type: 'text',
+      content: item.data
+    };
+  },
+  'error': (item) => {
+    return `[Error: ${JSON.stringify(item.data)}]`;
+  },
+  'unknown': (item) => {
+    return `[Unknown type: ${item.type}]`;
+  }
+};
+
+// Parse and format shared query response
+function formatSharedQueryResponse(data, format = 'full') {
+  if (format === 'json') {
+    return [{ type: 'text', content: JSON.stringify(data, null, 2) }];
+  }
+
+  if (!data.queries || data.queries.length === 0) {
+    return [{ type: 'text', content: JSON.stringify(data, null, 2) }];
+  }
+
+  const query = data.queries[0];
+  const result = [];
+
+  // Clean title by removing relevant_context tags if present
+  const cleanTitle = (text) => {
+    if (!text) return '';
+    return text.replace(/<relevant_context>[\s\S]*?<\/relevant_context>/g, '').trim() || text;
+  };
+
+  // Display title and query information
+  const displayTitle = cleanTitle(data.title) || cleanTitle(query.user_query) || 'DeepWiki Query Result';
+  result.push({ type: 'header', content: displayTitle });
+
+  if (format === 'full' && query.repos && query.repos.length > 0) {
+    const repoList = query.repos.map(r => r.name).join(', ');
+    result.push({ type: 'header', content: `📚 Repos: ${repoList}` });
+  }
+
+  if (format === 'full' && query.engine_id) {
+    result.push({ type: 'info', content: `🔍 Engine: ${query.engine_id}` });
+  }
+
+  if (!query.response || query.response.length === 0) {
+    if (query.error) {
+      result.push({ type: 'error', content: JSON.stringify(query.error, null, 2) });
+    } else {
+      result.push({ type: 'info', content: 'No response data available' });
+    }
+    return result;
+  }
+
+  // Filter response types based on format
+  const skipTypes = format === 'brief'
+    ? ['loading_indexes', 'stats', 'module_call_id', 'file_path_range', 'unknown']
+    : ['loading_indexes', 'stats', 'module_call_id', 'unknown'];
+
+  query.response.forEach(item => {
+    if (skipTypes.includes(item.type)) return;
+
+    const handler = RESPONSE_HANDLERS[item.type];
+    if (!handler) return;
+
+    const formatted = handler(item);
+
+    if (typeof formatted === 'string') {
+      result.push({ type: 'info', content: formatted });
+    } else if (formatted.type === 'file') {
+      result.push({
+        type: 'file',
+        repo: formatted.repo,
+        filePath: formatted.filePath,
+        content: formatted.content
+      });
+    } else if (formatted.type === 'text') {
+      result.push(formatted);
+    }
+  });
+
+  if (query.error) {
+    result.push({ type: 'error', content: `Error: ${JSON.stringify(query.error)}` });
+  }
+
+  return result;
+}
+
+// Display formatted response
+function displayFormattedResponse(formattedItems) {
+  formattedItems.forEach(item => {
+    switch (item.type) {
+      case 'header':
+        console.log(`\n${'█'.repeat(70)}`);
+        console.log(`  ${item.content}`);
+        console.log(`${'█'.repeat(70)}`);
+        break;
+      case 'file':
+        if (item.filePath && item.content) {
+          const repoPrefix = item.repo ? `${item.repo}/` : '';
+          console.log(`\n${'─'.repeat(70)}`);
+          console.log(`📄 ${repoPrefix}${item.filePath}`);
+          console.log(`${'─'.repeat(70)}`);
+          console.log(item.content);
+        }
+        break;
+      case 'text':
+        console.log(item.content);
+        break;
+      case 'info':
+        console.log(item.content);
+        break;
+      case 'error':
+        console.log(`\n❌ ${item.content}`);
+        break;
+    }
+  });
+}
+
 // i18n messages
 const MESSAGES = {
   en: {
@@ -25,13 +175,16 @@ const MESSAGES = {
       repoName: 'Repository name (e.g., "owner/repo")',
       topic: 'Documentation topic name',
       question: 'Your question about the repository',
-      uuid: 'Share query UUID (e.g., "_5495e609-f29e-44a7-a7bf-91c3f8f76303")'
+      uuid: 'Share query UUID (e.g., "_5495e609-f29e-44a7-a7bf-91c3f8f76303")',
+      format: 'Output format (brief|full|json, default: full)'
     },
     examples: {
       structure: '  deepwiki read_wiki_structure --repoName "openai/openai-node"',
       contents: '  deepwiki read_wiki_contents --repoName "openai/openai-node" --topic "Installation"',
       question: '  deepwiki ask_question --repoName "openai/openai-node" --question "How to authenticate?"',
-      share: '  deepwiki view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"'
+      share: '  deepwiki view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"',
+      shareBrief: '  deepwiki view_share --uuid "..." --format brief',
+      shareJson: '  deepwiki view_share --uuid "..." --format json'
     },
     errors: {
       noCommand: 'Error: No command provided',
@@ -69,13 +222,16 @@ const MESSAGES = {
       repoName: '仓库名称 (例如: "owner/repo")',
       topic: '文档主题名称',
       question: '关于仓库的问题',
-      uuid: '分享查询的 UUID (例如: "_5495e609-f29e-44a7-a7bf-91c3f8f76303")'
+      uuid: '分享查询的 UUID (例如: "_5495e609-f29e-44a7-a7bf-91c3f8f76303")',
+      format: '输出格式 (brief|full|json, 默认: full)'
     },
     examples: {
       structure: '  deepwiki read_wiki_structure --repoName "openai/openai-node"',
       contents: '  deepwiki read_wiki_contents --repoName "openai/openai-node" --topic "Installation"',
       question: '  deepwiki ask_question --repoName "openai/openai-node" --question "如何认证?"',
-      share: '  deepwiki view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"'
+      share: '  deepwiki view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"',
+      shareBrief: '  deepwiki view_share --uuid "..." --format brief',
+      shareJson: '  deepwiki view_share --uuid "..." --format json'
     },
     errors: {
       noCommand: '错误: 未提供命令',
@@ -125,6 +281,7 @@ function printHelp() {
   console.log(`  --topic, -t            ${t.options.topic}`);
   console.log(`  --question, -q         ${t.options.question}`);
   console.log(`  --uuid, -u             ${t.options.uuid}`);
+  console.log(`  --format, -f           ${t.options.format}`);
   console.log(`  --lang, -l             Language (en|zh, default: auto)`);
   console.log(`  --help, -h             ${t.help.title}`);
   console.log();
@@ -140,6 +297,8 @@ function printHelp() {
   console.log(t.examples.contents);
   console.log(t.examples.question);
   console.log(t.examples.share);
+  console.log(t.examples.shareBrief);
+  console.log(t.examples.shareJson);
   console.log();
   console.log(t.help.seeAlso);
   console.log();
@@ -163,7 +322,8 @@ const PARAM_ALIASES = {
   't': 'topic',
   'q': 'question',
   'u': 'uuid',
-  'l': 'lang'
+  'l': 'lang',
+  'f': 'format'
 };
 
 // Expand command alias
@@ -277,6 +437,8 @@ async function run() {
   if (command === 'view_share') {
     try {
       const url = `https://api.devin.ai/ada/query/${params.uuid}`;
+      const format = params.format || 'full';
+
       const response = await axios.get(url, {
         headers: {
           'Accept': 'application/json'
@@ -284,23 +446,8 @@ async function run() {
         timeout: 30000
       });
 
-      if (response.data.queries && response.data.queries.length > 0) {
-        const query = response.data.queries[0];
-        if (query.response) {
-          query.response.forEach(item => {
-            if (item.type === 'file_contents') {
-              console.log(`\n=== File: ${item.data[1]} ===\n`);
-              console.log(item.data[2]);
-            } else if (item.type === 'text') {
-              console.log(item.data);
-            }
-          });
-        } else {
-          console.log(JSON.stringify(response.data, null, 2));
-        }
-      } else {
-        console.log(JSON.stringify(response.data, null, 2));
-      }
+      const formatted = formatSharedQueryResponse(response.data, format);
+      displayFormattedResponse(formatted);
 
       process.exit(0);
     } catch (err) {

@@ -55,7 +55,15 @@ node dw.js ask_question --repoName "owner/repo" --question "your question"
 ### 4. View Shared Query Result (Direct API Access)
 ```bash
 cd ~/.pi/agent/skills/deepwiki
+
+# Full format (default)
 node dw.js view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"
+
+# Brief format (only essential information)
+node dw.js view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303" --format brief
+
+# JSON format (raw API response)
+node dw.js view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303" --format json
 ```
 
 ## Global CLI Usage
@@ -97,6 +105,7 @@ Parameters also support shorthand forms:
 | `--topic` | `-t` | Documentation topic name |
 | `--question` | `-q` | Your question about the repository |
 | `--uuid` | `-u` | Share query UUID (e.g., "_5495e609-f29e-44a7-a7bf-91c3f8f76303") |
+| `--format` | `-f` | Output format (brief|full|json, default: full) |
 | `--lang` | `-l` | Language (en|zh, default: auto) |
 | `--help` | `-h` | Show help |
 
