@@ -1,146 +1,62 @@
 ---
 name: deepwiki
-description: Retrieve GitHub repository documentation and knowledge from DeepWiki. Supports viewing document structure, content, and asking questions about repositories.
+description: "DeepWiki CLI - GitHub 仓库文档查询工具。用法: dw rws -r \"owner/repo\" | dw rwc -r \"owner/repo\" -t \"topic\" | dw aq -r \"owner/repo\" -q \"question\""
 ---
 
 # DeepWiki Skill
 
-This skill connects to DeepWiki via MCP SSE protocol.
+GitHub 仓库文档查询工具，通过 DeepWiki API 获取结构、内容和问答。
 
-## Execution Environment
+## 快速使用
 
-| Path Type | Path | Base Directory |
-|-----------|------|----------------|
-| **Skill Directory** | `~/.pi/agent/skills/deepwiki/` | Fixed location |
-| **Main Script** | `~/.pi/agent/skills/deepwiki/dw.js` | Skill directory |
-
-## Installation
-
-### Local Usage (Skill Directory)
 ```bash
-cd ~/.pi/agent/skills/deepwiki
-npm install eventsource axios
+# 查看文档结构
+dw rws -r "owner/repo"
+
+# 查看特定内容
+dw rwc -r "owner/repo" -t "topic"
+
+# 提问
+dw aq -r "owner/repo" -q "your question"
+
+# 查看共享结果
+dw vs -u "uuid"
 ```
 
-### Global Installation (Recommended)
+## 安装
+
 ```bash
 npm install -g deepwiki-cli
 ```
 
-Or using pnpm:
-```bash
-pnpm add -g deepwiki-cli
-```
+## 命令
 
-## Usage
+| 命令 | 别名 | 说明 |
+|------|------|------|
+| `read_wiki_structure` | `rws`, `str` | 获取文档结构 |
+| `read_wiki_contents` | `rwc`, `cont` | 读取文档内容 |
+| `ask_question` | `aq`, `ask` | 提问 |
+| `view_share` | `vs` | 查看共享查询 |
 
-### 1. Get Repository Documentation Structure
+## 参数
+
+| 参数 | 简写 | 说明 |
+|------|------|------|
+| `--repoName` | `-r` | 仓库名 (owner/repo) |
+| `--topic` | `-t` | 文档主题 |
+| `--question` | `-q` | 问题 |
+| `--uuid` | `-u` | 查询 UUID |
+| `--format` | `-f` | 格式 (brief\|full\|json) |
+| `--lang` | `-l` | 语言 (en\|zh) |
+
+## 本地使用
+
 ```bash
 cd ~/.pi/agent/skills/deepwiki
-node dw.js read_wiki_structure --repoName "owner/repo"
+node dw.js <command> [options]
 ```
 
-### 2. View Specific Documentation Content
-```bash
-cd ~/.pi/agent/skills/deepwiki
-node dw.js read_wiki_contents --repoName "owner/repo" --topic "topic_name"
-```
+## 链接
 
-### 3. Ask Questions About Repository
-```bash
-cd ~/.pi/agent/skills/deepwiki
-node dw.js ask_question --repoName "owner/repo" --question "your question"
-```
-
-### 4. View Shared Query Result (Direct API Access)
-```bash
-cd ~/.pi/agent/skills/deepwiki
-
-# Full format (default)
-node dw.js view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"
-
-# Brief format (only essential information)
-node dw.js view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303" --format brief
-
-# JSON format (raw API response)
-node dw.js view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303" --format json
-```
-
-## Global CLI Usage
-
-After global installation, you can use the `deepwiki` or `dw` command from anywhere:
-
-```bash
-# Using full command name
-deepwiki read_wiki_structure --repoName "owner/repo"
-deepwiki read_wiki_contents --repoName "owner/repo" --topic "topic_name"
-deepwiki ask_question --repoName "owner/repo" --question "your question"
-deepwiki view_share --uuid "_5495e609-f29e-44a7-a7bf-91c3f8f76303"
-
-# Using short alias
-dw rws -r "owner/repo"
-dw rwc -r "owner/repo" -t "topic_name"
-dw aq -r "owner/repo" -q "your question"
-dw vs -u "_5495e609-f29e-44a7-a7bf-91c3f8f76303"
-```
-
-## Command Aliases
-
-The CLI provides convenient aliases for all commands:
-
-| Full Command | Short Aliases | Description |
-|--------------|---------------|-------------|
-| `read_wiki_structure` | `rws`, `str` | Get repository documentation structure |
-| `read_wiki_contents` | `rwc`, `cont` | Read specific documentation content |
-| `ask_question` | `aq`, `ask` | Ask questions about the repository |
-| `view_share` | `vs` | View shared query result by UUID |
-
-## Parameter Aliases
-
-Parameters also support shorthand forms:
-
-| Full Parameter | Short Form | Description |
-|----------------|------------|-------------|
-| `--repoName` | `-r`, `--repo` | Repository name (e.g., "owner/repo") |
-| `--topic` | `-t` | Documentation topic name |
-| `--question` | `-q` | Your question about the repository |
-| `--uuid` | `-u` | Share query UUID (e.g., "_5495e609-f29e-44a7-a7bf-91c3f8f76303") |
-| `--format` | `-f` | Output format (brief|full|json, default: full) |
-| `--lang` | `-l` | Language (en|zh, default: auto) |
-| `--help` | `-h` | Show help |
-
-## Shell Completions
-
-The package includes shell completion scripts for bash, zsh, and fish.
-
-### Bash
-```bash
-source ~/.pi/agent/skills/deepwiki/completions/bash
-```
-
-### Zsh
-```bash
-source ~/.pi/agent/skills/deepwiki/completions/zsh
-```
-
-### Fish
-```bash
-source ~/.pi/agent/skills/deepwiki/completions/deepwiki.fish
-source ~/.pi/agent/skills/deepwiki/completions/dw.fish
-```
-
-## Path Notes
-
-- **All scripts must be executed from the `~/.pi/agent/skills/deepwiki/` directory**
-- The `dw.js` file is located in the skill installation directory and does not change with the working directory
-- If executing from another directory, you must first `cd ~/.pi/agent/skills/deepwiki/`
-
-## Repository
-
-- **GitHub**: https://github.com/Dwsy/deepwiki-skills
-- **npm**: https://www.npmjs.com/package/deepwiki-cli
-
-## Documentation
-
-- [English Documentation](./README.md)
-- [中文文档](./README.zh-CN.md)
+- GitHub: https://github.com/Dwsy/deepwiki-skills
+- npm: https://www.npmjs.com/package/deepwiki-cli
