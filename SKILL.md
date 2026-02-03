@@ -1,6 +1,6 @@
 ---
 name: deepwiki
-description: "DeepWiki CLI - GitHub 仓库文档查询工具。用法: dw rws -r \"owner/repo\" | dw rwc -r \"owner/repo\" -t \"topic\" | dw aq -r \"owner/repo\" -q \"question\""
+description: "DeepWiki CLI - GitHub 仓库文档查询工具,GitHub repo docs, repository documentation, read wiki contents, ask questions about repo, 查看GitHub仓库文档, 仓库文档查询, 项目文档阅读, 源码文档, dw rws, dw rwc, dw aq, deepwiki, GitHub documentation, open source project docs, 查看README, 文档结构, 代码库文档"
 ---
 
 # DeepWiki Skill
