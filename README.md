@@ -1,132 +1,35 @@
-# DeepWiki
+# DeepWiki CLI
 
-A powerful CLI tool for retrieving GitHub repository documentation and knowledge via DeepWiki MCP SSE protocol.
+GitHub 仓库文档查询工具。
 
-## Features
-
-- 🔍 **Explore Repository Structure**: View all available documentation topics
-- 📖 **Read Documentation Content**: Access detailed wiki contents
-- 💬 **Ask Questions**: Query repository knowledge using natural language
-
-## Installation
+## 安装
 
 ```bash
 npm install -g deepwiki-cli
 ```
 
-Or using pnpm:
+## 使用
 
 ```bash
-pnpm add -g deepwiki-cli
-```
-
-## Usage
-
-### 1. Get repository documentation structure
-
-```bash
-deepwiki read_wiki_structure --repoName "owner/repo"
-# or using short alias
+# 查看文档结构
 dw rws -r "owner/repo"
+
+# 读取文档内容
+dw rwc -r "owner/repo" -t "topic"
+
+# 提问
+dw aq -r "owner/repo" -q "question"
 ```
 
-### 2. View specific documentation content
+## 示例
 
 ```bash
-deepwiki read_wiki_contents --repoName "owner/repo" --topic "topic_name"
-# or using short alias
-dw rwc -r "owner/repo" -t "topic_name"
+# 查询 React Router 实现
+dw aq -r "facebook/react" -q "如何实现路由？"
+
+# 查询 FastAPI 文档
+dw rwc -r "tiangolo/fastapi" -t "dependency injection"
+
+# 列出所有模块
+dw rws -r "badlogic/pi-mono"
 ```
-
-### 3. Ask questions about the repository
-
-```bash
-deepwiki ask_question --repoName "owner/repo" --question "Your question here"
-# or using short alias
-dw aq -r "owner/repo" -q "Your question here"
-```
-
-## Prerequisites
-
-- Node.js 14 or higher
-- DeepWiki MCP server access
-- Valid GitHub repository path
-
-## Examples
-
-### OpenAI Node.js SDK
-
-```bash
-# Explore repository structure
-dw rws -r "openai/openai-node"
-
-# Read installation guide
-dw rwc -r "openai/openai-node" -t "Installation and Setup"
-
-# Ask about authentication
-dw aq -r "openai/openai-node" -q "How do I authenticate?"
-```
-
-### Linux Kernel
-
-```bash
-# Explore Linux kernel documentation
-dw rws -r "torvalds/linux"
-
-# Ask about Linux boot process
-dw aq -r "torvalds/linux" -q "How does Linux boot?"
-
-# Ask about kernel initialization
-dw aq -r "torvalds/linux" -q "How is the Linux kernel initialized during boot?"
-```
-
-### React
-
-```bash
-# Explore React documentation
-dw rws -r "facebook/react"
-
-# Ask about React hooks
-dw aq -r "facebook/react" -q "How do useEffect and useState work?"
-```
-
-## Command Aliases
-
-The CLI provides convenient aliases for all commands:
-
-| Full Command | Short Aliases | Description |
-|--------------|---------------|-------------|
-| `read_wiki_structure` | `rws`, `str` | Get repository documentation structure |
-| `read_wiki_contents` | `rwc`, `cont` | Read specific documentation content |
-| `ask_question` | `aq`, `ask` | Ask questions about the repository |
-
-## Parameter Shorthands
-
-| Full Parameter | Short Form | Description |
-|----------------|------------|-------------|
-| `--repoName` | `-r`, `--repo` | Repository name (e.g., "owner/repo") |
-| `--topic` | `-t` | Documentation topic name |
-| `--question` | `-q` | Your question about the repository |
-| `--lang` | `-l` | Language (en|zh, default: auto) |
-| `--help` | `-h` | Show help |
-
-## Dependencies
-
-- `axios` - HTTP client
-- `eventsource` - SSE protocol support
-
-## License
-
-ISC
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Repository
-
-https://github.com/Dwsy/deepwiki-skills
-
----
-
-[中文文档](./README.zh-CN.md)
